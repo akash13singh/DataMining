@@ -39,13 +39,13 @@ def runNNClassifier():
     classify_correct =0;
     classify_wrong = 0;
     start = time.time()
-    for i in test[0:len(test)]:
+    for i in test[0:1000]:
         test_counter+=1
         nearest_sample = train[0]
         max_similarity = cosine_similarity_numpy(i,nearest_sample)
 
 
-        for j in train[1:len(train)]:
+        for j in train[1:10000]:
             similarity = cosine_similarity_numpy(i,j)
             if similarity > max_similarity:
                 max_similarity = similarity
@@ -72,6 +72,8 @@ def cosine_similarity(v1,v2):
 
 def cosine_similarity_numpy(v1,v2):
     return numpy.dot(v1.features.flatten(),v2.features.flatten())/v1.length/v2.length
+
+
 
 if __name__ == '__main__':
     runNNClassifier()
