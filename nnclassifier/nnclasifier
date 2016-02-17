@@ -42,15 +42,15 @@ def runNNClassifier():
     for i in test[0:1000]:
         test_counter+=1
         nearest_sample = train[0]
-        max_similarity = cosine_similarity_numpy(i,nearest_sample)
+        min_distance = cosine_distance_numpy(i,nearest_sample)
 
 
         for j in train[1:10000]:
-            similarity = cosine_similarity_numpy(i,j)
-            if similarity > max_similarity:
-                max_similarity = similarity
+            distance = cosine_distance_numpy(i,j)
+            if distance < min_distance:
+                min_distance = distance
                 nearest_sample = j;
-            if max_similarity == 1:
+            if min_distance == 0:
                 break
 
         if i.label == nearest_sample.label:
@@ -62,16 +62,16 @@ def runNNClassifier():
     print("time taken: "+ str(end-start))
     print("total test smaples: "+str(test_counter)+"   classifed Correct: "+str(classify_correct)+"   clasified incorrect: "+str(classify_wrong))
 
-def cosine_similarity(v1,v2):
+def cosine_distance(v1,v2):
     dot_product = 0
     for i in range(len(v1.features)):
         dot_product += ( v1.features[i]*v2.features[i] )
     similarity = dot_product / ( 1.0*( v1.length * v2.length ) )
 
-    return similarity
+    return 1-similarity
 
-def cosine_similarity_numpy(v1,v2):
-    return numpy.dot(v1.features.flatten(),v2.features.flatten())/v1.length/v2.length
+def cosine_distance_numpy(v1,v2):
+    return 1- numpy.dot(v1.features.flatten(),v2.features.flatten())/v1.length/v2.length
 
 
 
