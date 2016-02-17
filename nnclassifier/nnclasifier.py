@@ -118,6 +118,37 @@ def confusion_matrix(data):
 
     return matrix
 
+def matrix(data):
+    # Initialize empty confusion matrix
+    # Rows are actual labels and columns are predicted labels
+    matrix = []
+    for r in range(NUM_LABEL):
+        matrix.append([0]*NUM_LABEL)
+
+
+    # Compute the matrix
+    for i in data:
+        temp = matrix[i.label][i.predicted_label]
+        matrix[i.label][i.predicted_label] = temp + 1
+
+    header = str("     |" + "%5d |"*10 + " Recall") % tuple(range(10))
+    print header
+    print "-"*len(header)
+
+    precision = [0]*10
+    for i in range(10):
+        correct_classify = matrix[i][i]*1.0
+        recall =  0 if correct_classify == 0 else correct_classify / sum( matrix[i] )
+        print str(" %3d |"+"%5d |"*10+"  %.2f") % tuple([i] + matrix[i] +[recall] )
+
+        label_precision = 0
+        for j in range(10):
+            precision[i] = precision[i] + matrix[j][i]
+        precision[i] = correct_classify / precision[i]
+
+    print "-"*len(header)
+    print str("Prec |" + " %.2f |"*10) % tuple( precision )
+
 def precision( confusion_matrix, class_name ):
     bucket = []
 
