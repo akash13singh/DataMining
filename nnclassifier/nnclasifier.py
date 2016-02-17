@@ -3,6 +3,7 @@ import time
 import numpy
 import pandas
 import random
+import pickle
 
 from scipy import linalg
 
@@ -32,13 +33,14 @@ def runNNClassifier():
     train = [ Sample( t[0], t[1] ) for t in train ]
     test = [ Sample( t[0], t[1] ) for t in test ]
 
+    # Set seed for shuffling
     # This guarantees that the shuffled set will be the same everytime.
     random.seed(SEED)
 
     # Randomly select a subset of testing set
     # as classing the whole set takes too long to compute.
     random.shuffle(test)
-    test = test[0:1000]
+    # test = test[0:10]
 
     print "Training set size: %d" % len(train)
     print "Testing set size: %d" % len(test)
@@ -46,18 +48,24 @@ def runNNClassifier():
     test_counter =0;
     start_time = time.time()
 
+    # Find nearest neighbor for all testing sample
     for i in test:
         test_counter+=1
         if test_counter % 10 == 0 :
-            print test_counter
+            print ">> " + str(test_counter)
+
+        # Set the first sample of training set as the nearest one.
         nearest_sample = train[0]
         min_distance = cosine_distance_numpy(i,nearest_sample)
 
+        # Iterate through all training set to find the nearest neighbor
         for j in train:
             distance = cosine_distance_numpy(i,j)
             if distance < min_distance:
                 min_distance = distance
                 nearest_sample = j;
+
+            # Stop further process if the min_distance is zero
             if min_distance == 0:
                 break
 
@@ -79,6 +87,11 @@ def runNNClassifier():
     time_diff = end_time - start_time
     print "Time spent : %.2fs ( %.2fs per sample )" % ( time_diff, time_diff*1.0/len(test) )
 
+    # Save the result for further analysis
+    output = open('predicted.pkl', 'wb')
+    pickle.dump( test, output )
+    output.close()
+
 def cosine_distance(v1,v2):
     dot_product = 0
     for i in range(len(v1.features)):
@@ -93,10 +106,12 @@ def cosine_distance_numpy(v1,v2):
 
 def confusion_matrix(data):
     # Initialize empty confusion matrix
+    # Rows are actual labels and columns are predicted labels
     matrix = []
     for r in range(NUM_LABEL):
         matrix.append([0]*NUM_LABEL)
 
+    # Compute the matrix
     for i in data:
         temp = matrix[i.label][i.predicted_label]
         matrix[i.label][i.predicted_label] = temp + 1
@@ -105,6 +120,8 @@ def confusion_matrix(data):
 
 def precision( confusion_matrix, class_name ):
     bucket = []
+
+    # Sum along a column to compute precision of a particular class
     for i in range(NUM_LABEL):
         bucket.append( confusion_matrix[i][class_name] )
 
