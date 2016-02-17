@@ -12,10 +12,9 @@ SEED = 71
 class  Sample:
     def __init__(self,features,label):
 
-        self.features = features
+        # normalise feature vector
+        self.features = features.flatten() / linalg.norm(features)
 
-        # Using scipy to compute the length of the vector
-        self.length= linalg.norm(self.features)
         self.label=-1
 
         if(isinstance( label, numpy.int64 )):
@@ -49,7 +48,8 @@ def runNNClassifier():
 
     for i in test:
         test_counter+=1
-        print test_counter
+        if test_counter % 10 == 0 :
+            print test_counter
         nearest_sample = train[0]
         min_distance = cosine_distance_numpy(i,nearest_sample)
 
@@ -69,6 +69,7 @@ def runNNClassifier():
     print "----- Confusion Matrix -----"
     matrix = confusion_matrix( test )
     print "%s" % ( pandas.DataFrame( matrix ) )
+    print "----------------------------"
     print "Accuracy : %0.2f" % ( accuracy(matrix) )
 
     for i in range(NUM_LABEL):
@@ -87,7 +88,7 @@ def cosine_distance(v1,v2):
     return 1-similarity
 
 def cosine_distance_numpy(v1,v2):
-    return 1 - numpy.dot(v1.features.flatten(),v2.features.flatten())/( v1.length*v2.length )
+    return 1 - numpy.dot(v1.features,v2.features)
 
 
 def confusion_matrix(data):
