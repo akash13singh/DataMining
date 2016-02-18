@@ -10,6 +10,7 @@ from scipy import linalg
 NUM_LABEL = 10
 SEED = 71
 
+#class for training/test sample object
 class  Sample:
     def __init__(self,features,label):
 
@@ -18,6 +19,7 @@ class  Sample:
 
         self.label=-1
 
+        #set label
         if(isinstance( label, numpy.int64 )):
             self.label = label
         else:
@@ -69,6 +71,7 @@ def runNNClassifier():
             if min_distance == 0:
                 break
 
+        #set predicted label to the label of nearest neighbor
         i.predicted_label = nearest_sample.label
 
     end_time = time.time()
@@ -100,6 +103,9 @@ def cosine_distance(v1,v2):
 
     return 1-similarity
 
+# To compute dot product efficiently, we use numpy package to compute
+# dot product. Since feature vector was normalized already when creating the Sample object,
+# we can use the dot product directly to compute the cosine distance
 def cosine_distance_numpy(v1,v2):
     return 1 - numpy.dot(v1.features,v2.features)
 
