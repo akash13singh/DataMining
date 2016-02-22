@@ -1,6 +1,8 @@
 #!/usr/local/bin/python
 from algorithm import naive
 from algorithm import gonzales
+from algorithm import kplus
+
 from optparse import OptionParser
 
 import dataloader_1b as dt
@@ -9,7 +11,7 @@ import numpy as np
 
 class  Sample:
     def __init__(self,features):
-        self.features = features
+        self.features = np.array(features)
 
 def print_samples( set_data ):
     print "["
@@ -113,8 +115,6 @@ while True:
             new_centers[c] = centers[c]
 
     # Stop if loss doesn't change anymore.
-    # print_samples( centers )
-    # print_samples( new_centers )
     if is_same_point_set( new_centers, centers ) :
         break
     else:
