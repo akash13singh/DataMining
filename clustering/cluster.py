@@ -1,15 +1,18 @@
 #!/usr/local/bin/python
 from algorithm import naive
 from algorithm import gonzales
+from algorithm import kplus
+
 from optparse import OptionParser
 
 import dataloader_1b as dt
 import math
 import numpy as np
+import plot
 
 class  Sample:
     def __init__(self,features):
-        self.features = features
+        self.features = np.array(features)
 
 def print_samples( set_data ):
     print "["
@@ -78,22 +81,28 @@ print "---"
 
 data = dt.load_data_1b("./data1b/C2.txt")
 data = [ Sample( d ) for d in data ]
+# data = data[0:10]
 
 # Find initial centers
 centers = eval(opt.algorithm).find_centers( opt.k, data );
 total_cost = 0
+print_samples( centers)
+print '----'
 
-clusters = empty_clusters(opt.k)
 
 iteration = 1
 while True:
     total_cost = 0
+    clusters = empty_clusters(opt.k)
     # Assign data to clusters
     for d in data:
         d.cluster = 0
         cost  = mean_cost( d, centers[d.cluster] )
-        for c in range(len(centers[1:])):
+        # print "Point %s "  % ( d.features )
+        # print "> center  %s : %f" % ( centers[d.cluster].features, cost )
+        for c in range(1, len(centers)):
             new_cost = mean_cost( d, centers[c] )
+            # print "> center  %s : %f" % ( centers[c].features, new_cost )
             if new_cost < cost :
                 cost      = new_cost
                 d.cluster = c
@@ -102,6 +111,7 @@ while True:
                 cost      = 0
                 break
 
+        # print "----- belong to %d" % ( d.cluster )
         clusters[d.cluster].append(d)
         total_cost = total_cost + cost
 
@@ -113,19 +123,16 @@ while True:
             new_centers[c] = centers[c]
 
     # Stop if loss doesn't change anymore.
-    # print_samples( centers )
-    # print_samples( new_centers )
     if is_same_point_set( new_centers, centers ) :
         break
     else:
         centers = new_centers
-
-        # Print debug msg
         s = "iteration " + str( iteration ) + " : "
         for c in centers:
             s = s + str(c.features)
         print s
 
+    # print "\n\n"
     iteration = iteration + 1
 
 print "---"
@@ -136,4 +143,6 @@ for d in data:
 
 print "---"
 print "total_cost: %4f" % ( total_cost )
-print "iteration: %d" % ( iteration )
+print "iteration: %d" % ( iteration - 1 )
+
+plot.plot( data, centers);
