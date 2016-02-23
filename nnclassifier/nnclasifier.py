@@ -44,8 +44,8 @@ def runNNClassifier():
     random.shuffle(test)
     # test = test[0:10]
 
-    print "Training set size: %d" % len(train)
-    print "Testing set size: %d" % len(test)
+    print("Training set size: %d" % len(train))
+    print("Testing set size: %d" % len(test))
 
     test_counter =0;
     start_time = time.time()
@@ -53,8 +53,8 @@ def runNNClassifier():
     # Find nearest neighbor for all testing sample
     for i in test:
         test_counter+=1
-        if test_counter % 10 == 0 :
-            print ">> " + str(test_counter)
+        if test_counter % 5000 == 0 :
+            print(">> " + str(test_counter))
 
         # Set the first sample of training set as the nearest one.
         nearest_sample = train[0]
@@ -77,18 +77,18 @@ def runNNClassifier():
     end_time = time.time()
 
     # Compute confusion_matrix, accuracy and prediction and recall for each label
-    print "----- Confusion Matrix -----"
+    print("----- Confusion Matrix -----")
     matrix = confusion_matrix( test )
-    print "%s" % ( pandas.DataFrame( matrix ) )
-    print "----------------------------"
-    print "Accuracy : %0.2f" % ( accuracy(matrix) )
+    print("%s" % ( pandas.DataFrame( matrix ) ))
+    print("----------------------------")
+    print("Accuracy : %0.2f" % ( accuracy(matrix) ))
 
     for i in range(NUM_LABEL):
-        print "Label %d : precision: %.2f \t recall: %.2f" % ( i, precision( matrix, i ), recall( matrix, i ) )
+        print("Label %d : precision: %.2f \t recall: %.2f" % ( i, precision( matrix, i ), recall( matrix, i ) ))
 
-    print "----------------"
+    print ("----------------")
     time_diff = end_time - start_time
-    print "Time spent : %.2fs ( %.2fs per sample )" % ( time_diff, time_diff*1.0/len(test) )
+    print("Time spent : %.2fs ( %.2fs per sample )" % ( time_diff, time_diff*1.0/len(test) ))
 
     # Save the result for further analysis
     output = open('predicted.pkl', 'wb')
@@ -138,22 +138,22 @@ def matrix(data):
         matrix[i.label][i.predicted_label] = temp + 1
 
     header = str("     |" + "%5d |"*10 + " Recall") % tuple(range(10))
-    print header
-    print "-"*len(header)
+    print(header)
+    print("-"*len(header))
 
     precision = [0]*10
     for i in range(10):
         correct_classify = matrix[i][i]*1.0
         recall =  0 if correct_classify == 0 else correct_classify / sum( matrix[i] )
-        print str(" %3d |"+"%5d |"*10+"  %.2f") % tuple([i] + matrix[i] +[recall] )
+        print(str(" %3d |"+"%5d |"*10+"  %.2f") % tuple([i] + matrix[i] +[recall] ))
 
         label_precision = 0
         for j in range(10):
             precision[i] = precision[i] + matrix[j][i]
         precision[i] = correct_classify / precision[i]
 
-    print "-"*len(header)
-    print str("Prec |" + " %.2f |"*10) % tuple( precision )
+    print("-"*len(header))
+    print(str("Prec |" + " %.2f |"*10) % tuple( precision ))
 
 def precision( confusion_matrix, class_name ):
     bucket = []
@@ -193,7 +193,7 @@ def accuracy( confusion_matrix ):
 
 def log( format, data=() ):
     text = format % data
-    print text
+    print(text)
 
 if __name__ == '__main__':
     runNNClassifier()
