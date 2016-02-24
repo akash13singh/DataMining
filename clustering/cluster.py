@@ -2,6 +2,7 @@
 from algorithm import naive
 from algorithm import gonzales
 from algorithm import kplus
+from algorithm import lloyd
 
 from optparse import OptionParser
 
@@ -28,7 +29,7 @@ def mean_cost( p1, p2 ):
     dim = len(p1.features)
     for d in range(dim):
         sos = sos + math.pow(p1.features[d] - p2.features[d],2)
-    return math.sqrt(sos)
+    return sos
 
 def empty_clusters(k):
     clusters = []
@@ -77,6 +78,8 @@ print "algorithm: %s" % ( opt.algorithm )
 print "loss-function: %s" % ( "mean" )
 print "---"
 
+filename = str(opt.k) +"-mean-"+opt.algorithm
+
 # Load data here
 
 data = dt.load_data_1b("./data1b/C2.txt")
@@ -86,9 +89,8 @@ data = [ Sample( d ) for d in data ]
 # Find initial centers
 centers = eval(opt.algorithm).find_centers( opt.k, data );
 total_cost = 0
-print_samples( centers)
-print '----'
 
+plot.plot_clusters( [], centers, 0, filename=filename+"-0" )
 
 iteration = 1
 while True:
@@ -121,6 +123,8 @@ while True:
         new_centers[c] = mean_center( clusters[c] )
         if( new_centers[c] is None ):
             new_centers[c] = centers[c]
+
+    plot.plot_clusters( clusters, new_centers, total_cost, filename=filename+"-"+str(iteration) )
 
     # Stop if loss doesn't change anymore.
     if is_same_point_set( new_centers, centers ) :
