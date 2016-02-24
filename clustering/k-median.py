@@ -25,7 +25,8 @@ def calculate_kmedian_cost(p1,p2):
     cost = math.sqrt(cost)
     return cost
 
-def calculate_new_medians(clusters):
+def calculate_new_medians():
+
     new_medians=[]
     for x in sorted(np.unique(data[...,6])):
         new_medians.append([np.median(data[np.where(data[...,6]==x)][...,1].astype(np.float)),
@@ -34,6 +35,60 @@ def calculate_new_medians(clusters):
         np.median(data[np.where(data[...,6]==x)][...,4].astype(np.float)),
         np.median(data[np.where(data[...,6]==x)][...,5].astype(np.float))])
     return new_medians
+
+    #return simulated_annealing()
+
+
+def simulated_annealing():
+    step = 100
+    eps = .001
+    medians=[]
+    tmp_medians=[]
+    for x in sorted(np.unique(data[...,6])):
+        medians.append([np.mean(data[np.where(data[...,6]==x)][...,1].astype(np.float)),
+        np.mean(data[np.where(data[...,6]==x)][...,2].astype(np.float)),
+        np.mean(data[np.where(data[...,6]==x)][...,3].astype(np.float)),
+        np.mean(data[np.where(data[...,6]==x)][...,4].astype(np.float)),
+        np.mean(data[np.where(data[...,6]==x)][...,5].astype(np.float))])
+
+    print(medians)
+    min = calculate_cost(data,medians)
+    vectors = [[1,0,0,0,0],[0,1,0,0,0],[0,0,1,0,0],[0,0,0,1,0],[0,0,0,0,1],[-1,0,0,0,0],[0,-1,0,0,0],[0,0,-1,0,0],[0,0,0,-1,0],[0,0,0,0,-1]]
+
+    while step > eps:
+        improved = False
+        for v in vectors:
+            tmp_medians = medians
+            for m in range(len(medians)):
+                for j in range(len(medians[m])):
+                    tmp_medians[m][j] = medians[m][j]+ step*v[j]
+                dist =  calculate_cost(data,tmp_medians)
+                if dist < min:
+                    min =dist
+                    medians[m] = tmp_medians[m]
+                    improved =True
+            if improved==True:
+                break
+        if improved!=True:
+           step = step/2
+    return medians
+
+def calculate_cost(data,medians):
+    total_cost = 0
+    for i in range(len(data)):
+        #find nearest median and assign cluster
+        min_cost = calculate_kmedian_cost(data[i][1:5],medians[0])
+
+        count =1
+        for j in medians[1:]:
+            cost = calculate_kmedian_cost(data[i][1:5],j)
+            if cost < min_cost:
+                min_cost = cost
+                cluster = count
+            count+=1
+        total_cost += min_cost
+    return total_cost
+
 
 def create_clusters(medians,num_clusters):
     global data
@@ -66,8 +121,9 @@ def run():
     num_clusters = 4
     median_indices = []
     data = load_data_1b("./data1b/C3.txt")
-
+    #data = data[1:20,]
     #initialize median index
+
     np.random.seed(37)
     median_indices = np.random.randint(0,len(data),num_clusters)
     median_indices = median_indices.tolist()
@@ -82,23 +138,23 @@ def run():
     while(True):
         print("---------------Iteration "+str(z)+"------------------------")
         print("medians: "+str(medians))
-        print("clusters: "+str(clusters))
-        print("cost :: %f",cost_k_median)
+        #print("clusters: "+str(clusters))
+        print("cost ::"+str(cost_k_median))
 
-        new_medians = calculate_new_medians(clusters)
+        new_medians = calculate_new_medians()
 
         print("new_medians "+str(new_medians))
         new_cost_k_median,new_clusters = create_clusters(new_medians,num_clusters)
-        print("new cost %f",new_cost_k_median)
-
+        print("new cost ::"+str(new_cost_k_median))
+        print(" ")
+        print(" ")
+        print(" ")
         if new_cost_k_median >= cost_k_median:
             break
-        median = new_medians
+        medians = new_medians
         clusters = new_clusters
         cost_k_median = new_cost_k_median
         z=z+1
-
-
 
 if __name__ == "__main__":
    run()
