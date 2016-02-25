@@ -27,6 +27,8 @@ def calculate_kmedian_cost(p1,p2):
 
 def calculate_new_medians():
 
+    '''
+    uncomment the below code for using median of each dimension and comment the call to simulated annealing.
     new_medians=[]
     for x in sorted(np.unique(data[...,6])):
         new_medians.append([np.median(data[np.where(data[...,6]==x)][...,1].astype(np.float)),
@@ -35,8 +37,9 @@ def calculate_new_medians():
         np.median(data[np.where(data[...,6]==x)][...,4].astype(np.float)),
         np.median(data[np.where(data[...,6]==x)][...,5].astype(np.float))])
     return new_medians
+    '''
 
-    #return simulated_annealing()
+    return simulated_annealing()
 
 
 def simulated_annealing():
@@ -53,6 +56,8 @@ def simulated_annealing():
 
     print(medians)
     min = calculate_cost(data,medians)
+
+    # since we have five dimensions we need to  search in 10 directrions
     vectors = [[1,0,0,0,0],[0,1,0,0,0],[0,0,1,0,0],[0,0,0,1,0],[0,0,0,0,1],[-1,0,0,0,0],[0,-1,0,0,0],[0,0,-1,0,0],[0,0,0,-1,0],[0,0,0,0,-1]]
 
     while step > eps:
@@ -98,6 +103,7 @@ def create_clusters(medians,num_clusters):
         clusters.append([])
     total_cost = 0
     for i in range(len(data)):
+
         #find nearest median and assign cluster
         min_cost = calculate_kmedian_cost(data[i][1:5],medians[0])
         cluster = 0
@@ -121,9 +127,8 @@ def run():
     num_clusters = 4
     median_indices = []
     data = load_data_1b("./data1b/C3.txt")
-    #data = data[1:20,]
-    #initialize median index
 
+    #initialize cluster centres by uniformaly sampling the points. Set seed to reproduce results.
     np.random.seed(37)
     median_indices = np.random.randint(0,len(data),num_clusters)
     median_indices = median_indices.tolist()
@@ -138,7 +143,7 @@ def run():
     while(True):
         print("---------------Iteration "+str(z)+"------------------------")
         print("medians: "+str(medians))
-        #print("clusters: "+str(clusters))
+
         print("cost ::"+str(cost_k_median))
 
         new_medians = calculate_new_medians()
