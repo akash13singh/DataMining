@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-colors = ["r","g","b","y","m"]
+colors = ["r","g","b","y","m", "k"]
 
 def symbol( cluster_index, point_type ):
     symbol = colors[cluster_index];

@@ -70,6 +70,7 @@ parser.add_option("-a", "--algorithm", dest="algorithm",
     help="Algorithm for initialization center points", default="naive"
 )
 parser.add_option("-k", "--cluster", dest="k", type="int", default=2 )
+parser.add_option("-f", "--filename", dest="filename", default="temp" )
 
 (opt, args) = parser.parse_args()
 
@@ -79,6 +80,8 @@ print "loss-function: %s" % ( "mean" )
 print "---"
 
 filename = str(opt.k) +"-mean-"+opt.algorithm
+if opt.filename != "temp":
+    filename = opt.filename
 
 # Load data here
 
@@ -124,6 +127,7 @@ while True:
         if( new_centers[c] is None ):
             new_centers[c] = centers[c]
 
+    print "%d : cost : %f" %( iteration, total_cost )
     plot.plot_clusters( clusters, new_centers, total_cost, filename=filename+"-"+str(iteration) )
 
     # Stop if loss doesn't change anymore.
@@ -149,4 +153,4 @@ print "---"
 print "total_cost: %4f" % ( total_cost )
 print "iteration: %d" % ( iteration - 1 )
 
-plot.plot( data, centers);
+plot.plot( data, centers, filename=filename+'-final');

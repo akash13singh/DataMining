@@ -33,7 +33,6 @@ def find_centers( k, data ):
         for i in range(1,len(cumulative_alpha)):
             if( cumulative_alpha[i-1] <=  r and r < cumulative_alpha[i] ):
                 ( data, element ) = pop_from_numpy( data, i-1 )
-                # print '--------'
                 centers.append( element )
                 break
     return centers
