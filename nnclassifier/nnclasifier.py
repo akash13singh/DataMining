@@ -4,18 +4,43 @@ import numpy
 import pandas
 import random
 import pickle
+import math
+from optparse import OptionParser
 
 from scipy import linalg
 
 NUM_LABEL = 10
 SEED = 71
 
+
+class RandomProjection:
+
+    def __init__(self, k, d):
+        print("k: "+str(k))
+        print("d: "+str(d))
+        # generate matrix R k x d
+        coefficient = 1/math.sqrt(d)
+        self.R = [[ self.pom()*coefficient for x in range(d)] for x in range(k)]
+
+    def project( self, obj ):
+        return numpy.dot( self.R, obj );
+        numpy.dot
+
+    # Plus or minus
+    def pom(self):
+        if random.random() < 0.5:
+            return -1
+        return 1
+
 #class for training/test sample object
 class  Sample:
     def __init__(self,features,label):
 
-        # normalise feature vector
-        self.features = features.flatten() / linalg.norm(features)
+
+        # do not normalise feature vector because of euclidean distance
+        #self.features = features.flatten() / linalg.norm(features)
+
+        self.features = features.flatten()
 
         self.label=-1
 
@@ -28,12 +53,20 @@ class  Sample:
                     self.label = k
 
 
-def runNNClassifier():
-    (train, validation, test) = data_loader.load_data_wrapper();
+def runNNClassifier(train,test,dist_type, reduce_dim_flag, new_dims):
 
+    if reduce_dim_flag[0] == "y":
+         train = list(train)
+         print("size of train "+str(len(train)))
+         R = RandomProjection( new_dims, len(train[0][0]))
+         train = [ Sample(  R.project(t[0]), t[1] ) for t in train ]
+         test =  [ Sample(  R.project(t[0]), t[1] ) for t in test ]
+         print(len(train))
+         print(len(test))
+    else :
     # Convert data to "Sample" object
-    train = [ Sample( t[0], t[1] ) for t in train ]
-    test = [ Sample( t[0], t[1] ) for t in test ]
+        train = [ Sample( t[0], t[1] ) for t in train ]
+        test = [ Sample( t[0], t[1] ) for t in test ]
 
     # Set seed for shuffling
     # This guarantees that the shuffled set will be the same everytime.
@@ -41,7 +74,7 @@ def runNNClassifier():
 
     # Randomly select a subset of testing set
     # as classing the whole set takes too long to compute.
-    random.shuffle(test)
+    #random.shuffle(test)
     # test = test[0:10]
 
     print("Training set size: %d" % len(train))
@@ -58,11 +91,14 @@ def runNNClassifier():
 
         # Set the first sample of training set as the nearest one.
         nearest_sample = train[0]
-        min_distance = cosine_distance_numpy(i,nearest_sample)
+
+        min_distance = calculate_distance(dist_type,i,nearest_sample)
 
         # Iterate through all training set to find the nearest neighbor
         for j in train:
-            distance = cosine_distance_numpy(i,j)
+            #distance = cosine_distance_numpy(i,j)
+
+            distance = calculate_distance(dist_type,i,j)
             if distance < min_distance:
                 min_distance = distance
                 nearest_sample = j;
@@ -107,8 +143,23 @@ def cosine_distance(v1,v2):
 # dot product. Since feature vector was normalized already when creating the Sample object,
 # we can use the dot product directly to compute the cosine distance
 def cosine_distance_numpy(v1,v2):
+    #print(numpy.shape(v1.features))
+    #print(numpy.shape(v2.features))
+    #return 1 - numpy.dot(v1.features/linalg.norm(v1.features),v2.features/linalg.norm(v2.features))
     return 1 - numpy.dot(v1.features,v2.features)
 
+
+#function to compute dot educlidean distance
+def euclidean_distance(v1,v2):
+    dist = numpy.linalg.norm(v1.features-v2.features)
+    return dist
+
+def calculate_distance(dist_type,v1,v2):
+    if dist_type =="euclidean":
+        return euclidean_distance(v1,v2)
+    if dist_type =="cosine":
+        return cosine_distance_numpy(v1,v2)
+    return "error"
 
 def confusion_matrix(data):
     # Initialize empty confusion matrix
@@ -195,5 +246,21 @@ def log( format, data=() ):
     text = format % data
     print(text)
 
+
 if __name__ == '__main__':
-    runNNClassifier()
+    parser = OptionParser()
+    parser.add_option("-d","--dist_metric: 1.cosine   2.euclidean", dest="dist_type", type="string" ,default ="euclidean")
+    parser.add_option("-r","--reduce dimensions: Y(es) ,N(o)", dest="reduce_dims_flag", type="string", default="yes")
+    parser.add_option("-k", "--new_dimensions", dest="k", type="int", default=100 )
+    parser.add_option("-n", "--train_data_len", dest="n", type="int", default=1000)
+    parser.add_option("-t", "--test_data_len", dest="t", type="int", default=100)
+
+    (opt, args) = parser.parse_args()
+    print("distance_metric: "+opt.dist_type)
+    print("reduce_dims_flag: "+opt.reduce_dims_flag)
+    print("data lenght: "+str(opt.n))
+    print("new dinmesnions: "+str(opt.k))
+
+
+    (train, validation, test) = data_loader.load_data_wrapper(opt.n,opt.t)
+    runNNClassifier(train,test,opt.dist_type, opt.reduce_dims_flag.lower(), opt.k)
