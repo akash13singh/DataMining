@@ -39,8 +39,6 @@ def run():
 
     (opt, args) = parser.parse_args()
 
-
-
     (train, validation, test) = data_loader.load_data_wrapper();
 
     train = train[:opt.n]
@@ -55,16 +53,18 @@ def run():
 
     train = [ Sample( t[0], R.project(t[0]), t[1] ) for t in train ]
 
-
+    total = 0;
     f = open( "k-"+str(opt.k)+".csv", 'wt')
     try:
         writer = csv.writer(f)
         writer.writerow( ('Instance 1', 'Instance 2', 'Distortion') )
         for i in range(len(train)):
             a = train[i]
-            for j in range(len(train)):
+            for j in range(i+1,len(train)):
                 if i == j:
                     continue
+
+                total+=1
                 b = train[j]
                 dist_k_dim = np.linalg.norm( a.low_features - b.low_features )
                 dist_d_dim = np.linalg.norm( a.features - b.features )
@@ -72,6 +72,8 @@ def run():
                 writer.writerow( (i+1, j+1, "%.4f" % ( distortion ) ))
     finally:
         f.close()
+    # total should be C(20,2)
+    print(total)
 
 if __name__ == "__main__":
    run()
