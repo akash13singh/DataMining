@@ -16,6 +16,7 @@ dot_data = StringIO()
 
 from IPython.display import Image
 
+# clf is a decision tree object.
 tree.export_graphviz(clf, out_file=dot_data,
                          feature_names=iris.feature_names,
                          class_names=iris.target_names,
