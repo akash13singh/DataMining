@@ -15,13 +15,11 @@ def run():
     p1=0
     p0=0
     data= load_data()
-    arr = np.array([[1,42,31,64,1],[2,98,76,12,0],[3,90,72,53,1]])
     #size of dataset
     n= len(data)
     # no of bootsptrap samples
     N = 100
     num_forests= 10
-    i = 1
     row_num = np.arange(0,n,1)
     p1_arr  = np.zeros(n)
     oob_count_arr = np.zeros(n)
@@ -84,8 +82,8 @@ def run():
             p0 = 1  - p1
             miss_rate = miss_arr[k]/oob_count
             weight = oob_count/N
-            sample_bias = sample_bias +  pow(miss_rate,2)
-            sample_variance = sample_variance + (p0*p1)
+            sample_bias = sample_bias +  pow(miss_rate,2) * weight
+            sample_variance = sample_variance + (p0*p1) * weight
 
         squared_bias = sample_bias/n
         variance = sample_variance/n
